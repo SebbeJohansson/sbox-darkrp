@@ -13,6 +13,10 @@
     padding: $safe-zone-x $safe-zone-y;
   }
 
+  &.with-hud-deadzone {
+    margin: $hud-deadzone-x $hud-deadzone-y;
+  }
+
   &.bottom-left {
     position: absolute;
     left: 0;

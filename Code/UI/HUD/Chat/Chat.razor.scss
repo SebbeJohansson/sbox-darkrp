@@ -6,21 +6,26 @@ Chat {
   height: 100%;
   justify-content: center;
   align-items: center;
-}
+  color: $white;
+  
+  .chat-container {
+    width: 560px;
 
-.chat-container {
-  width: 400px;
+    .message, .input label, .playername {
+      text-transform: none;
+    }
 
-  .message, .input label, .playername {
-    text-transform: none;
-  }
+    .when-open {
+      display: none;
+    }
 
-  .when-open {
-    display: none;
-  }
-
-  .when-not-open {
-    display: flex;
+    .button-instruction {
+      display: flex;
+      label {
+        padding-top: 5px;
+        line-height: 12px;
+      }
+    }
   }
 }
 
@@ -32,7 +37,7 @@ Chat.open {
       display: flex;
     }
 
-    .when-not-open {
+    .button-instruction {
       display: none;
     }
   }

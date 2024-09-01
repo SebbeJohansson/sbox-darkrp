@@ -2,8 +2,8 @@ $layout-standard-padding: 8px;
 $layout-extra-padding: 16px;
 $layout-insane-padding: 64px;
 
-$hud-deadzone-x: 32px;
-$hud-deadzone-y: 16px;
+$hud-deadzone-x: 100px;
+$hud-deadzone-y: $safe-zone-y;
 
 .page {
   &.header {
@@ -204,14 +204,20 @@ $hud-deadzone-y: 16px;
   }
 }
 
-.square {
-  width: 24px;
-  height: 24px;
-
-  background-position: center;
-  background-size: cover;
-
-  &.rounded {
-    border-radius: 50%;
+.image {
+  &.square {
+    width: 24px;
+    height: 24px;
+  
+    background-position: center;
+    background-size: cover;
+  
+    &.rounded {
+      border-radius: 50%;
+    }
+    &.big {
+      width: 48px;
+      height: 48px;
+    }
   }
 }

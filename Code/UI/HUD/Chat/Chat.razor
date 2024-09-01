@@ -14,47 +14,40 @@
 
 <root class="absolute inset-0">
 	<canvas>
-		<div class="chat-container hud flex column with-deadzone bottom-left with-px">
+		<div class="chat-container hud flex column with-deadzone bottom-left with-padding">
 			<div class="hud flex column justify-start">
 				@foreach ( var entry in Entries )
 				{
-					<div class="hud flex row gap-sm align-center">
+					<div class="message-wrapper">
 						@if ( entry.steamid > 0 )
 						{
-							<div class="square rounded shrink-0" style="background-image: url( avatar:@entry.steamid )"></div>
+							<div class="image big square rounded shrink-0" style="background-image: url( avatar:@entry.steamid )"></div>
 						}
-
-						@if ( entry.type == MessageType.Chat )
-						{
-							<span class="flex row w-full align-center shrink-0 gap-sm">
-								<span class="flex row gap-sm align-center shrink-0">
-
-									<label class="small no-shadow">[OOC]</label>
-									<label class="playername bold no-shadow" style="color: @entry.color.Hex">@entry.author: </label>
+						<div class="hud flex column with-px">
+							@if ( entry.type == MessageType.Chat )
+							{
+								<span class="flex row w-full align-center shrink-0 gap-sm">
+									<span class="flex row gap-sm align-center shrink-0">
+										<label class="small no-shadow">[OOC]</label>
+										<label class="playername bold no-shadow" style="color: @entry.color.Hex">@entry.author: </label>
+									</span>
 								</span>
-
-								<label class="message no-shadow">@entry.message</label>
-							</span>
-						}
-						else
-						{
-							<span class="flex row gap-sm w-full align-center">
-								<label class="message no-shadow">@entry.message</label>
-							</span>
-						}
+							}
+							<label class="message no-shadow">@entry.message</label>
+						</div>
 					</div>
 				}
 			</div>
 
 			<div class="layout gap">
-				<div class="when-not-open flex align-center gap-sm shrink-0">
+				<div class="button-instruction flex align-center justify-center gap-sm shrink-0">
 					<InputHint Action="Chat" class="small" Size="@InputGlyphSize.Small"/>
 					<label>
 						Chat
 					</label>
 				</div>
 
-				<div class="when-not-open flex align-center gap-sm shrink-0">
+				<div class="button-instruction flex align-center gap-sm shrink-0">
 					<InputHint Action="Menu" class="small" Size="@InputGlyphSize.Small"/>
 					<label>
 						Menu
@@ -106,14 +99,6 @@
 		{
 			InputBox.Focus();
 		}
-
-		if ( Entries.RemoveAll( x => x.timeSinceAdded > 20.0f ) > 0 )
-		{
-			StateHasChanged();
-		}
-
-		// Limit to 10 messages
-		Entries = Entries.TakeLast( 10 ).ToList();
 
 		SetClass( "open", InputBox.HasFocus );
 	}
