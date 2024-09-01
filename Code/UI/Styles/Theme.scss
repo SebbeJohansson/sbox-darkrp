@@ -16,10 +16,13 @@ $unassigned-color: #808080;
 
 $blur: blur(50px);
 
+$button-standard-padding: 12px 24px;
+$button-small-padding: 8px 24px;
+
+
 @import "Colors.scss";
 @import "Text.scss";
 @import "Layout.scss";
-@import "Buttons.scss";
 @import "Containers.scss";
 @import "Hud.scss";
 @import "Hints.scss";
