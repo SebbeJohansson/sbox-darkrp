@@ -1,0 +1,19 @@
+@import "/UI/Styles/Theme.scss";
+
+CommandsPart {
+	width: 40%;
+	flex-direction: column;
+
+	.commands {
+		flex-direction: column;
+		gap: 5px;
+
+		.command.button {
+			text-align: center;
+			text-transform: uppercase;
+			width: 100%;
+			background-color: $button-accent-color;
+			color: $white;
+		}
+	}
+}

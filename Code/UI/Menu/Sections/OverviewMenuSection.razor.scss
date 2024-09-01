@@ -1,5 +1,12 @@
 @import "/UI/Styles/Theme.scss";
 
 OverviewMenuSection {
-
+    gap: 20px;
+    .about {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        border-right: 1px solid $menu-accent-color;
+        padding-right: 10px;
+    }
 }
