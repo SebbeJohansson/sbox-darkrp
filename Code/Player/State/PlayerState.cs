@@ -67,6 +67,8 @@ public partial class PlayerState : Component
 	public void HostInit()
 	{
 		RespawnState = RespawnState.Immediate;
+		Log.Info(Connection?.Id + " has joined the server");
+		Log.Info(GameObject.Parent.Id + " has joined the server with id");
 
 		SteamId = Connection?.SteamId ?? 0;
 		SteamName = Connection?.DisplayName;

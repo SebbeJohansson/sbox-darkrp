@@ -127,6 +127,10 @@
               "models/citizen_props/roadcone01.vmdl"
             ],
             "SpawnProtectionTimeWindow": 1
+          },
+          {
+            "__type": "Dxura.Darkrp.CommandsManager",
+            "__guid": "c9737b5b-6bf9-4c2c-8db0-1dfb5b345ee9"
           }
         ]
       }

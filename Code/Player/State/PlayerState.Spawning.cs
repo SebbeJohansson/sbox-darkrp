@@ -50,7 +50,7 @@ public partial class PlayerState
 	public void Respawn(SpawnPointInfo spawnPoint, bool forceNew )
 	{
 		Log.Info(
-			$"Spawning player.. ( {GameObject.Name} ({DisplayName}, {Job}), {spawnPoint.Position}, [{string.Join( ", ", spawnPoint.Tags )}] )" );
+			$"Spawning player.. ( {GameObject.Name} {GameObject.Id} ({DisplayName}, {Job}), {spawnPoint.Position}, [{string.Join( ", ", spawnPoint.Tags )}] )" );
 
 		if ( forceNew || !Player.IsValid() || Player.HealthComponent.State == LifeState.Dead )
 		{

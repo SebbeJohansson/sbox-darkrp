@@ -2,6 +2,7 @@
 @using Sandbox.UI;
 @using Sandbox.Events;
 @using Dxura.Darkrp.UI;
+@using Dxura.Darkrp.Commands;
 
 @inherits PanelComponent
 @implements Component.INetworkListener
@@ -9,27 +10,30 @@
 
 @attribute [StyleSheet]
 
-@if ( !MainHUD.IsHudEnabled )
+@if (!MainHUD.IsHudEnabled)
 	return;
 
 <root class="absolute inset-0">
 	<canvas>
 		<div class="chat-container hud flex column with-deadzone bottom-left with-padding">
 			<div class="hud flex column justify-start">
-				@foreach ( var entry in Entries )
+				@Entries.Count
+				@foreach (var entry in Entries)
 				{
 					<div class="message-wrapper">
-						@if ( entry.steamid > 0 )
+						@if (entry.steamid > 0)
 						{
-							<div class="image big square rounded shrink-0" style="background-image: url( avatar:@entry.steamid )"></div>
+							<div class="image big square rounded shrink-0"
+								style="background-image: url( avatar:@entry.steamid )"></div>
 						}
 						<div class="hud flex column with-px">
-							@if ( entry.type == MessageType.Chat )
+							@if (entry.type == MessageType.Chat)
 							{
 								<span class="flex row w-full align-center shrink-0 gap-sm">
 									<span class="flex row gap-sm align-center shrink-0">
 										<label class="small no-shadow">[OOC]</label>
-										<label class="playername bold no-shadow" style="color: @entry.color.Hex">@entry.author: </label>
+										<label class="playername bold no-shadow" style="color: @entry.color.Hex">@entry.author:
+										</label>
 									</span>
 								</span>
 							}
@@ -41,20 +45,34 @@
 
 			<div class="layout gap">
 				<div class="button-instruction flex align-center justify-center gap-sm shrink-0">
-					<InputHint Action="Chat" class="small" Size="@InputGlyphSize.Small"/>
+					<InputHint Action="Chat" class="small" Size="@InputGlyphSize.Small" />
 					<label>
 						Chat
 					</label>
 				</div>
 
 				<div class="button-instruction flex align-center gap-sm shrink-0">
-					<InputHint Action="Menu" class="small" Size="@InputGlyphSize.Small"/>
+					<InputHint Action="Menu" class="small" Size="@InputGlyphSize.Small" />
 					<label>
 						Menu
 					</label>
 				</div>
+				test
+				<div>command suggestions count:@CommandSuggestions.Count </div>
 
-				<ChatBox class="input" @ref=" InputBox" onsubmit="@ChatFinished"></ChatBox>
+				@if (CommandSuggestions.Count > 0)
+				{
+					<div class="command-suggestions">
+						@foreach (var command in CommandSuggestions)
+						{
+							<div class="command">
+								<label class="command-name">@command.Name</label>
+								<label class="command-description">@command.Description</label>
+							</div>
+						}
+					</div>
+				}
+				<ChatBox class="input" @ref=" InputBox" onchange="@ChatChanged" onsubmit="@ChatFinished"></ChatBox>
 			</div>
 		</div>
 	</canvas>
@@ -70,13 +88,19 @@
 
 	private TextEntry InputBox { get; set; }
 
-	public record Entry( ulong steamid, string author, string message, RealTimeSince timeSinceAdded, MessageType type, Color color, string tags = null, string location = null );
+	public record Entry(ulong steamid, string author, string message, RealTimeSince timeSinceAdded, MessageType type, Color
+	color, string tags = null, string location = null);
 
 	private List<Entry> Entries = new();
 
 	private bool Open => InputBox?.HasFocus ?? false;
 
 	public static Chat Instance { get; set; }
+
+	private List<BaseCommand> Commands = new();
+	public record CommandSuggestion(string Name, string Description, string Command);
+	public List<CommandSuggestion> CommandSuggestions = new();
+	@* public List<BaseCommand> CommandSuggestions = new(); *@
 
 	public Chat()
 	{
@@ -85,22 +109,54 @@
 
 	protected override int BuildHash()
 	{
-		return HashCode.Combine( Open, MainHUD.IsHudEnabled );
+		return HashCode.Combine(Open, MainHUD.IsHudEnabled);
 	}
 
 	protected override void OnUpdate()
 	{
-		if ( InputBox is null )
+		if (InputBox is null)
 			return;
 
 		Panel.AcceptsFocus = false;
 
-		if ( Input.Pressed( "chat" ) )
+		if (Input.Pressed("chat"))
 		{
+			SetCommandList();
 			InputBox.Focus();
 		}
 
-		SetClass( "open", InputBox.HasFocus );
+		SetClass("open", InputBox.HasFocus);
+	}
+
+	void ChatChanged()
+	{
+		Log.Info("chat changed and we have " + Commands.Count + " commands");
+		var text = InputBox.Text;
+		if (Commands.Count > 0 && text.StartsWith("/"))
+		{
+			Log.Info("command detected");
+			Commands.ForEach(c => CommandSuggestions.Add(new CommandSuggestion(c.Name, c.Description, c.Command)));
+			Log.Info("command suggestions count:" + CommandSuggestions.Count);
+			@* CommandSuggestions = Commands; *@
+			@* SetCommandSuggestions(text); *@
+		}
+		CommandSuggestions = new List<CommandSuggestion>();
+	}
+
+	private void SetCommandSuggestions(string text)
+	{
+		if (text.Length < 2)
+		{
+			@* CommandSuggestions = Commands; *@
+			return;
+		}
+		Log.Info("Command detected");
+		var firstWord = text.Split(' ')[0].ToLower().Substring(1);
+		Log.Info("first word" + firstWord);
+		Log.Info("first word substring" + firstWord.Substring(1));
+		Log.Info(Commands.Where(c => c.Command.StartsWith(firstWord)).ToList().Count);
+		@* CommandSuggestions = Commands.Where(c => c.Command.StartsWith(firstWord)).ToList(); *@
+
 	}
 
 	void ChatFinished()
@@ -108,58 +164,67 @@
 		var text = InputBox.Text;
 		InputBox.Text = "";
 
-		if ( string.IsNullOrWhiteSpace( text ) )
+		if (string.IsNullOrWhiteSpace(text))
 			return;
 
-		AddText( text );
+		AddText(text);
 	}
 
 	[Broadcast]
-	public void AddText( string message, string tags = null )
+	public void AddText(string message, string tags = null)
 	{
-		message = message.Truncate( 300 );
+		message = message.Truncate(300);
 
-		if ( string.IsNullOrWhiteSpace( message ) )
+		if (string.IsNullOrWhiteSpace(message))
 			return;
 
 		var author = Rpc.Caller.DisplayName;
 		var steamid = Rpc.Caller.SteamId;
 
-		var player = GameUtils.AllPlayers.FirstOrDefault( x => x.Connection == Rpc.Caller );
+		var player = GameUtils.AllPlayers.FirstOrDefault(x => x.Connection == Rpc.Caller);
 		var color = player.Job.Color;
 
-		Entries.Add( new Entry( steamid, author, message, 0.0f, MessageType.Chat, color, tags ) );
+		Entries.Add(new Entry(steamid, author, message, 0.0f, MessageType.Chat, color, tags));
 
 		StateHasChanged();
 	}
 
-	[Broadcast( NetPermission.HostOnly )]
-	public void AddSystemText( string message )
+	[Broadcast(NetPermission.HostOnly)]
+	public void AddSystemText(string message)
 	{
-		message = message.Truncate( 300 );
+		message = message.Truncate(300);
 
-		if ( string.IsNullOrWhiteSpace( message ) )
+		if (string.IsNullOrWhiteSpace(message))
 			return;
 
-		Entries.Add( new Entry( 0, "", message, 0.0f, MessageType.System, Color.White ) );
+		Entries.Add(new Entry(0, "", message, 0.0f, MessageType.System, Color.White));
 		StateHasChanged();
 	}
 
-	void IGameEventHandler<JobAssignedEvent>.OnGameEvent( JobAssignedEvent eventArgs )
+	void IGameEventHandler<JobAssignedEvent>.OnGameEvent(JobAssignedEvent eventArgs)
 	{
-		if ( IsProxy ) return;
+		if (IsProxy) return;
 
-		AddSystemText( $"{eventArgs.Player.DisplayName} is now  {eventArgs.Job.Name}" );
+		AddSystemText($"{eventArgs.Player.DisplayName} is now {eventArgs.Job.Name}");
 	}
 
-	void INetworkListener.OnDisconnected( Connection channel )
+	void INetworkListener.OnDisconnected(Connection channel)
 	{
-		if ( IsProxy ) return;
+		if (IsProxy) return;
 
 		// TODO: why would these events get fired with an empty guid in the first place?
-		if ( channel.Id == Guid.Empty )
+		if (channel.Id == Guid.Empty)
 			return;
 
-		AddSystemText( $"{channel.DisplayName} has left the game" );
+		AddSystemText($"{channel.DisplayName} has left the game");
+	}
+
+	// TODO: Run this method also when our rank/permissions change
+	@* [Broadcast] *@
+	public void SetCommandList(@* List<BaseCommand> commands *@)
+	{
+		@* Log.Info(commands); *@
+		@* Commands = commands; *@
+		@* Commands = CommandsManager.Instance.Commands; *@
 	}
 }
