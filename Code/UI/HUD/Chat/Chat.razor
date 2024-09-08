@@ -128,33 +128,33 @@
 
 	void ChatChanged()
 	{
-		Log.Info("chat changed and we have " + Commands.Count + " commands");
+		@* Log.Info("chat changed and we have " + Commands.Count + " commands"); *@
 		var text = InputBox.Text;
-		SetCommandSuggestions(text)
-		if (Commands.Count > 0 && text.StartsWith("/"))
-		{
-			CommandSuggestions = new List<CommandSuggestion>(); 
-			Log.Info("command detected");
-			Commands.ForEach(c => CommandSuggestions.Add(new CommandSuggestion(c.Name, c.Description, c.Command)));
-			Log.Info("command suggestions count:" + CommandSuggestions.Count);
-		}
+		SetCommandSuggestions(text);
 	}
 
 	private void SetCommandSuggestions(string text)
 	{
-		Log.Info("text.length:" + text.Length);
-		if (text.Length < 2)
+		if (Commands.Count > 0 && text.StartsWith("/"))
 		{
-			CommandSuggestions = Commands;
-			return;
+			CommandSuggestions = new List<CommandSuggestion>();
+			@* Log.Info("command detected"); *@
+			// TODO: Check in a better way, and check if we are actually typing the start of hte command.
+			Commands.ForEach(c => CommandSuggestions.Add(new CommandSuggestion(c.Name, c.Description, c.Command)));
+			@* Log.Info("command suggestions count:" + CommandSuggestions.Count); *@
 		}
-		Log.Info("Command detected");
-		var firstWord = text.Split(' ')[0].ToLower().Substring(1);
-		Log.Info("first word" + firstWord);
-		Log.Info("first word substring" + firstWord.Substring(1));
-		Log.Info(Commands.Where(c => c.Command.StartsWith(firstWord)).ToList().Count);
-		CommandSuggestions = Commands.Where(c => c.Command.StartsWith(firstWord)).ToList();
+		else
+		{
+			CommandSuggestions = new List<CommandSuggestion>();
+		}
 
+	}
+
+	private BaseCommand GetSentCommand(string text)
+	{
+		Log.Info("get sent command");
+		Log.Info("command should follow:" + text);
+		return Commands.FirstOrDefault(c => c.Command == text);
 	}
 
 	void ChatFinished()
@@ -165,6 +165,22 @@
 		if (string.IsNullOrWhiteSpace(text))
 			return;
 
+		if (text.StartsWith("/"))
+		{
+			var parts = text?.SplitQuotesStrings();
+			var commandString = parts[0].Substring(1).ToLower();
+			var args = parts.Skip(1).ToArray();
+			var command = GetSentCommand(commandString);
+			Log.Info("command detected: " + command);
+			if (command != null)
+			{
+				Log.Info("command string detected" + command.Command);
+				// TODO: Proper args check.
+				command.Execute(args);
+				return;
+			}
+			Log.Warning("We found command '" + commandString + "' but it was not found in the list of commands, so nothing was run.");
+		}
 		AddText(text);
 	}
 
@@ -218,12 +234,8 @@
 	}
 
 	// TODO: Run this method also when our rank/permissions change
-	@* [Broadcast] *@
-	public void SetCommandList(@* List<BaseCommand> commands *@)
+	public void SetCommandList()
 	{
-		@* Log.Info(commands); *@
-		@* Commands = commands; *@
 		Commands = CommandsManager.Instance.Commands;
-		@* Log.Info("commands count:" + Commands.Count); *@
 	}
 }
