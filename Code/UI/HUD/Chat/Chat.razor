@@ -43,7 +43,7 @@
 				}
 			</div>
 
-			<div class="layout gap">
+			<div class="layout gap input-wrapper">
 				<div class="button-instruction flex align-center justify-center gap-sm shrink-0">
 					<InputHint Action="Chat" class="small" Size="@InputGlyphSize.Small" />
 					<label>
@@ -57,12 +57,10 @@
 						Menu
 					</label>
 				</div>
-				test
-				<div>command suggestions count:@CommandSuggestions.Count </div>
 
 				@if (CommandSuggestions.Count > 0)
 				{
-					<div class="command-suggestions">
+					<div class="command-suggestions when-open">
 						@foreach (var command in CommandSuggestions)
 						{
 							<div class="command">
@@ -109,7 +107,7 @@
 
 	protected override int BuildHash()
 	{
-		return HashCode.Combine(Open, MainHUD.IsHudEnabled);
+		return HashCode.Combine(Open, MainHUD.IsHudEnabled, CommandSuggestions);
 	}
 
 	protected override void OnUpdate()
@@ -132,22 +130,22 @@
 	{
 		Log.Info("chat changed and we have " + Commands.Count + " commands");
 		var text = InputBox.Text;
+		SetCommandSuggestions(text)
 		if (Commands.Count > 0 && text.StartsWith("/"))
 		{
+			CommandSuggestions = new List<CommandSuggestion>(); 
 			Log.Info("command detected");
 			Commands.ForEach(c => CommandSuggestions.Add(new CommandSuggestion(c.Name, c.Description, c.Command)));
 			Log.Info("command suggestions count:" + CommandSuggestions.Count);
-			@* CommandSuggestions = Commands; *@
-			@* SetCommandSuggestions(text); *@
 		}
-		CommandSuggestions = new List<CommandSuggestion>();
 	}
 
 	private void SetCommandSuggestions(string text)
 	{
+		Log.Info("text.length:" + text.Length);
 		if (text.Length < 2)
 		{
-			@* CommandSuggestions = Commands; *@
+			CommandSuggestions = Commands;
 			return;
 		}
 		Log.Info("Command detected");
@@ -155,7 +153,7 @@
 		Log.Info("first word" + firstWord);
 		Log.Info("first word substring" + firstWord.Substring(1));
 		Log.Info(Commands.Where(c => c.Command.StartsWith(firstWord)).ToList().Count);
-		@* CommandSuggestions = Commands.Where(c => c.Command.StartsWith(firstWord)).ToList(); *@
+		CommandSuggestions = Commands.Where(c => c.Command.StartsWith(firstWord)).ToList();
 
 	}
 
@@ -225,6 +223,7 @@
 	{
 		@* Log.Info(commands); *@
 		@* Commands = commands; *@
-		@* Commands = CommandsManager.Instance.Commands; *@
+		Commands = CommandsManager.Instance.Commands;
+		@* Log.Info("commands count:" + Commands.Count); *@
 	}
 }

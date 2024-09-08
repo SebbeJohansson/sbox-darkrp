@@ -19,12 +19,23 @@ Chat {
       display: none;
     }
 
+    .input-wrapper {
+      position: relative;
+    }
+
     .button-instruction {
       display: flex;
       label {
         padding-top: 5px;
         line-height: 12px;
       }
+    }
+
+    .command-suggestions {
+      position: absolute;
+      top: -40px;
+      background-color: black;
+      width: 100%;
     }
   }
 }
