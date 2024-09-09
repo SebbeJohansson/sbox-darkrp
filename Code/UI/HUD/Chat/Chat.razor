@@ -64,7 +64,8 @@
 						@foreach (var command in CommandSuggestions)
 						{
 							<div class="command">
-								<label class="command-name">@command.Name</label>
+								<label class="command-string">/@command.Command</label>
+								<label> - </label> 
 								<label class="command-description">@command.Description</label>
 							</div>
 						}
@@ -175,8 +176,9 @@
 			if (command != null)
 			{
 				Log.Info("command string detected" + command.Command);
+				Log.Info("Running ccommand, and it should only run on the host.");
 				// TODO: Proper args check.
-				command.Execute(args);
+				RunCommand(command, args);
 				return;
 			}
 			Log.Warning("We found command '" + commandString + "' but it was not found in the list of commands, so nothing was run.");
@@ -237,5 +239,18 @@
 	public void SetCommandList()
 	{
 		Commands = CommandsManager.Instance.Commands;
+	}
+
+	[Broadcast]
+	public void RunCommand(BaseCommand command, string[] args)
+	{
+		@* Log.Info("Run command on host via commandsmanager.");
+		CommandsManager.Instance.ExecuteCommandOnHost(command, args); *@
+
+		using ( Rpc.FilterInclude( Connection.Host ) )
+		{
+			Log.Info("We are host " + Networking.IsHost + "and we are running the command.");
+			command.Execute(args);
+		}
 	}
 }

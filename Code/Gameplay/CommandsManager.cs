@@ -26,6 +26,13 @@ public class CommandsManager  : SingletonComponent<CommandsManager>
 	}
 
 	// [Broadcast ( NetPermission.HostOnly )]
+	// public void ExecuteCommandOnHost(BaseCommand command, string[] args) {
+		
+	// 	Log.Info("We are host " + Networking.IsHost + "and we are running the command.");
+	// 	command.Execute(args);
+	// }
+
+	// [Broadcast ( NetPermission.HostOnly )]
 	// public void UpdateCommandList() {
 	// 	Chat.Instance.SetCommandList(GetCommands());
 	// }
